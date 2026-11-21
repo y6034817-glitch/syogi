@@ -1,0 +1,8 @@
+# Supabase CLI の設定（ローカル開発・デプロイ用）
+# project_id は `supabase link` 後に書き換わります。
+
+project_id = "shogi-online"
+
+[functions.submit-move]
+# JWT は関数の中で auth.getUser() により検証する（新しい JWT 署名鍵でも動くように）
+verify_jwt = false
