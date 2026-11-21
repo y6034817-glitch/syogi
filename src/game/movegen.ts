@@ -7,8 +7,6 @@ import { Position, piece } from './position.ts';
 // 8方向（先手視点: dy=-1 が前進）
 const DIR_X = [-1, 0, 1, -1, 1, -1, 0, 1];
 const DIR_Y = [-1, -1, -1, 0, 0, 1, 1, 1];
-// 上下反転した方向の添字
-const FLIP = [5, 6, 7, 3, 4, 0, 1, 2];
 
 function mask(...idx: number[]): boolean[] {
   const m = new Array<boolean>(8).fill(false);
@@ -52,53 +50,6 @@ export const SLIDE_DIRS: Record<PieceType, boolean[]> = {
   RY: mask(1, 3, 4, 6),
 };
 export { DIR_X, DIR_Y };
-
-/** sq のマスに by 側の駒の利きがあるか（逆方向に走査） */
-export function isAttacked(board: (Piece | null)[], sq: number, by: Color): boolean {
-  const x = sq % 9;
-  const y = (sq / 9) | 0;
-  for (let i = 0; i < 8; i++) {
-    const dx = DIR_X[i];
-    const dy = DIR_Y[i];
-    const ni = by === 'b' ? i : FLIP[i];
-    let px = x - dx;
-    let py = y - dy;
-    let dist = 1;
-    while (px >= 0 && px < 9 && py >= 0 && py < 9) {
-      const p = board[py * 9 + px];
-      if (p) {
-        if (p.c === by && (SLIDE_DIRS[p.t][ni] || (dist === 1 && STEP_DIRS[p.t][ni]))) return true;
-        break;
-      }
-      px -= dx;
-      py -= dy;
-      dist++;
-    }
-  }
-  const ky = by === 'b' ? y + 2 : y - 2;
-  if (ky >= 0 && ky < 9) {
-    for (let k = -1; k <= 1; k += 2) {
-      const kx = x + k;
-      if (kx < 0 || kx > 8) continue;
-      const p = board[ky * 9 + kx];
-      if (p && p.c === by && p.t === 'KE') return true;
-    }
-  }
-  return false;
-}
-
-export function findKing(board: (Piece | null)[], c: Color): number {
-  for (let i = 0; i < 81; i++) {
-    const p = board[i];
-    if (p && p.c === c && p.t === 'OU') return i;
-  }
-  return -1;
-}
-
-export function isInCheck(pos: Position, c: Color = pos.turn): boolean {
-  const k = findKing(pos.board, c);
-  return k >= 0 && isAttacked(pos.board, k, other(c));
-}
 
 /** 盤上の駒 p が from から動ける先（自駒の上は除く）を列挙 */
 function forEachTarget(board: (Piece | null)[], from: number, p: Piece, cb: (to: number) => void): void {

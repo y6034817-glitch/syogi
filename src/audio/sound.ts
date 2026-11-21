@@ -8,7 +8,6 @@ export type SoundName =
   | 'select'
   | 'deselect'
   | 'promote'
-  | 'check'
   | 'win'
   | 'draw'
   | 'error'
@@ -118,12 +117,6 @@ class SoundManager {
           this.tone(ctx, { freq: f, dur: 0.55, type: 'triangle', gain: 0.17, at: i * 0.07 });
           this.tone(ctx, { freq: f * 2, dur: 0.4, gain: 0.05, at: i * 0.07 });
         });
-        break;
-      case 'check':
-        this.tone(ctx, { freq: 150, end: 52, dur: 0.38, gain: 0.85 });
-        this.clack(ctx, 500, 0.6, 0.12, 0.5);
-        this.tone(ctx, { freq: 1760, dur: 0.6, gain: 0.1, at: 0.04 });
-        this.tone(ctx, { freq: 130, end: 55, dur: 0.3, gain: 0.6, at: 0.17 });
         break;
       case 'win':
         [523.25, 587.33, 659.25, 783.99, 880, 1046.5, 1318.5].forEach((f, i) => {

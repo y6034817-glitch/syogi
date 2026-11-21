@@ -3,10 +3,10 @@
 import type { Color, Move } from './types.ts';
 import { other } from './types.ts';
 import { Position } from './position.ts';
-import { applyMove, isInCheck, legalMoves } from './movegen.ts';
+import { applyMove, legalMoves } from './movegen.ts';
 import { formatMove } from './notation.ts';
 
-export type ResultKind = 'king_capture' | 'resign' | 'timeout' | 'repetition' | 'perpetual' | 'disconnect' | 'void';
+export type ResultKind = 'king_capture' | 'resign' | 'timeout' | 'repetition' | 'disconnect' | 'void';
 
 export interface GameResult {
   kind: ResultKind;
@@ -19,8 +19,6 @@ export class GameSession {
   readonly moves: Move[] = [];
   /** 各手の日本語表記（▲７六歩 など） */
   readonly labels: string[] = [];
-  /** 各手が王手になったか */
-  readonly checks: boolean[] = [];
   result: GameResult | null = null;
   private legalCache = new Map<number, Move[]>();
 
@@ -36,9 +34,6 @@ export class GameSession {
   }
   get lastMove(): Move | null {
     return this.moves.length ? this.moves[this.moves.length - 1] : null;
-  }
-  get inCheck(): boolean {
-    return isInCheck(this.position);
   }
 
   /** 現局面の合法手 */
@@ -78,12 +73,9 @@ export class GameSession {
     this.positions.push(after);
     this.moves.push(m);
     this.labels.push(label);
-    const check = isInCheck(after);
-    this.checks.push(check);
 
-    // このゲームでは詰みはなく、相手の王将を取ったときだけ通常の勝敗が決まる。
-    const capturedKing = move.from !== -1 && before.board[move.to]?.t === 'OU';
-    if (capturedKing) {
+    // 王手・詰みの判定はない（実際の盤と同じ）。相手の王将を取ったら勝ち。
+    if (m.capture === 'OU') {
       this.result = { kind: 'king_capture', winner: before.turn };
     } else {
       this.result = this.detectRepetition();
@@ -91,7 +83,7 @@ export class GameSession {
     return this.result;
   }
 
-  /** 同一局面4回（千日手）。連続王手なら王手をかけ続けた側の負け。 */
+  /** 同一局面4回（千日手・引き分け） */
   private detectRepetition(): GameResult | null {
     const n = this.positions.length - 1;
     const key = this.positions[n].key();
@@ -128,7 +120,6 @@ export class GameSession {
     this.positions.pop();
     this.moves.pop();
     this.labels.pop();
-    this.checks.pop();
     this.legalCache.delete(this.positions.length);
     this.result = null;
     return true;
@@ -152,8 +143,6 @@ export function resultText(r: GameResult, names: { b: string; w: string }): stri
       return `投了により${w}の勝ち`;
     case 'timeout':
       return `時間切れにより${w}の勝ち`;
-    case 'perpetual':
-      return `連続王手の千日手により${w}の勝ち`;
     case 'disconnect':
       return `相手の切断により${w}の勝ち`;
     case 'void':

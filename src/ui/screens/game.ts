@@ -484,7 +484,6 @@ export class GameScreen implements Screen {
   private highlights(): Highlights {
     const idx = this.cursor;
     const last = idx > 0 ? this.session.moves[idx - 1] : null;
-    const checkSq: number | null = null;
     const live = this.canInput();
     const types = new Set<HandType>();
     this.dropSqs.forEach((l) => l.forEach((t) => types.add(t)));
@@ -493,7 +492,6 @@ export class GameScreen implements Screen {
       selectedHand: live && this.selectedHand ? { color: this.session.turn, type: this.selectedHand } : null,
       targets: live ? this.targetsFor() : [],
       lastMove: last ? { from: last.from, to: last.to } : null,
-      checkSq,
       movable: live ? [...this.movableSqs] : [],
       droppable: live ? [...this.dropSqs.keys()] : [],
       droppableTypes: live ? [...types] : [],

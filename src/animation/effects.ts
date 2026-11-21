@@ -69,9 +69,9 @@ export function shake(el: HTMLElement, strong = false): void {
   );
 }
 
-export type BannerKind = 'check' | 'start' | 'promote';
+export type BannerKind = 'start' | 'promote';
 
-/** 「王手」などの大きな文字演出 */
+/** 「対局開始」などの大きな文字演出 */
 export async function banner(host: HTMLElement, text: string, kind: BannerKind, hold = 620): Promise<void> {
   const el = h('div', `banner banner-${kind}`, [h('span', 'banner-text', [text]), h('span', 'banner-band')]);
   host.append(el);
@@ -109,8 +109,8 @@ export async function banner(host: HTMLElement, text: string, kind: BannerKind, 
   el.remove();
 }
 
-/** 王手時の赤い縁取り */
-export function vignette(host: HTMLElement, kind: 'red' | 'gold' = 'red'): void {
+/** 勝敗が決まったときの金色の縁取り */
+export function vignette(host: HTMLElement, kind: 'gold' = 'gold'): void {
   const el = h('div', `vignette vignette-${kind}`);
   host.append(el);
   void play(el, [{ opacity: 0 }, { opacity: 1, offset: 0.25 }, { opacity: 0 }], { duration: 1100, easing: 'ease-out' }).then(

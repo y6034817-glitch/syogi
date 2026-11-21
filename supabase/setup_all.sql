@@ -208,7 +208,7 @@ end $$;
 -- ============================================================
 
 -- ---------- 内部: 対局の確定（レーティング更新を含む） ----------
--- p_kind: checkmate | resign | timeout | repetition | perpetual | disconnect | void
+-- p_kind: king_capture | resign | timeout | repetition | disconnect | void
 create or replace function private.finalize_game(p_game uuid, p_kind text, p_winner text)
 returns void language plpgsql security definer set search_path = public, private as $$
 declare
@@ -693,7 +693,7 @@ $$;
 
 -- ============================================================
 -- Edge Function（service_role）専用: 検証済みの手を記録する
--- 手の合法性・詰み・千日手の判定は Edge Function がルールエンジンで行う。
+-- 手の合法性（二歩・行き所のない駒など。王手・詰みの判定はない）・玉の捕獲・千日手の判定は Edge Function がルールエンジンで行う。
 -- ============================================================
 create or replace function public.record_move(
   p_game uuid, p_user uuid, p_ply int, p_usi text, p_result_kind text default null, p_winner text default null)

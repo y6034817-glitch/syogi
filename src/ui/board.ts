@@ -18,7 +18,6 @@ export interface Highlights {
   selectedHand: { color: Color; type: HandType } | null;
   targets: { sq: number; capture: boolean }[];
   lastMove: { from: number; to: number } | null;
-  checkSq: number | null;
   /** 「動かす」モードで動かせる駒のマス */
   movable: number[];
   /** 「置く」モードで置けるマス（持ち駒のどれかが置ける場所） */
@@ -34,7 +33,6 @@ export const NO_HIGHLIGHTS: Highlights = {
   selectedHand: null,
   targets: [],
   lastMove: null,
-  checkSq: null,
   movable: [],
   droppable: [],
   droppableTypes: [],
@@ -261,7 +259,6 @@ export class BoardView {
       if (hl.lastMove.from !== DROP) add('hl-last-from', hl.lastMove.from);
       add('hl-last-to', hl.lastMove.to);
     }
-    if (hl.checkSq !== null) add('hl-check', hl.checkSq);
     if (hl.selected !== null) add('hl-selected', hl.selected);
     // 手番の操作に使えるマスは、ヒント設定に関係なく常に示す（操作の入口になるため）
     if (hl.mode === 'move' && hl.selected === null) {
@@ -586,16 +583,6 @@ export class BoardView {
       duration: 340,
       easing: 'cubic-bezier(.2,1.4,.4,1)',
     });
-  }
-
-  /** 王手・詰みの演出 */
-  async fxCheck(kingSq: number, label = '王手'): Promise<void> {
-    const d = this.disp(kingSq);
-    sound.play('check');
-    fx.ring(this.fxLayer, d.x, d.y, 'red');
-    fx.vignette(this.root, 'red');
-    fx.shake(this.boardEl, true);
-    await fx.banner(this.root, label, 'check');
   }
 
   async fxStart(): Promise<void> {
